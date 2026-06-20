@@ -1,0 +1,17 @@
+---
+description: Core coding standards for RojgarApp (backend + frontend)
+alwaysApply: true
+---
+
+Follow these rules for all code in this repository. Full details in `CODING_RULES.md`.
+
+- No function may exceed **30 lines** (excluding signature and blank lines). A function does one thing; split otherwise.
+- Max **4 parameters** per function; pass an object/dataclass beyond that.
+- **One feature = one package.** Backend: a dedicated Django app. Frontend: a dedicated `features/<name>/` folder. Features must not import each other's internals; share only via `core`/`common`.
+- Keep source files under ~200 lines.
+- Use descriptive, full-word names. Booleans read as questions (`is_active`).
+- No magic strings/numbers; use constants or settings. Secrets come from environment variables only.
+- Comment **why**, not **what**. No commented-out code.
+- Never silently swallow errors. Validate input at the boundary (serializers/forms).
+- Backend flow: `model → serializer → view → url`. Non-trivial logic goes in `services.py`, not the view.
+- Each feature package ships with at least basic tests.
