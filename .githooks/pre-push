@@ -1,0 +1,10 @@
+#!/bin/sh
+# Runs the backend test suite before allowing a push.
+# Enable once per clone: git config core.hooksPath .githooks
+# Emergency bypass: git push --no-verify
+set -e
+
+echo "[pre-push] Running backend tests..."
+docker compose run --rm backend python manage.py test
+
+echo "[pre-push] Tests passed. Proceeding with push."

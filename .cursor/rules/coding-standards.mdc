@@ -5,13 +5,15 @@ alwaysApply: true
 
 Follow these rules for all code in this repository. Full details in `CODING_RULES.md`.
 
-- No function may exceed **30 lines** (excluding signature and blank lines). A function does one thing; split otherwise.
-- Max **4 parameters** per function; pass an object/dataclass beyond that.
-- **One feature = one package.** Backend: a dedicated Django app. Frontend: a dedicated `features/<name>/` folder. Features must not import each other's internals; share only via `core`/`common`.
+- No function may exceed **30 lines** (excluding signature and blank lines). A function does one thing; split otherwise. Max **4 parameters** (pass an object beyond that).
+- **One feature = one package.** Backend: a Django app. Frontend: a `features/<name>/` folder. Features must not import each other's internals; share only via `core`/`common`.
 - Keep source files under ~200 lines.
-- Use descriptive, full-word names. Booleans read as questions (`is_active`).
-- No magic strings/numbers; use constants or settings. Secrets come from environment variables only.
+- Descriptive, full-word names. Booleans read as questions (`is_active`).
+- **No magic strings/numbers.** Every package keeps constants in a dedicated `constants.py` (backend) or `constants.ts` (frontend) in that folder. Global config goes in settings/env. Secrets come from environment variables only and are never committed.
 - Comment **why**, not **what**. No commented-out code.
 - Never silently swallow errors. Validate input at the boundary (serializers/forms).
+- Use type hints on backend signatures. No `any` on the frontend; keep `tsc` green.
 - Backend flow: `model → serializer → view → url`. Non-trivial logic goes in `services.py`, not the view.
-- Each feature package ships with at least basic tests.
+- **Multi-tenancy (row-level):** every business entity inherits `core.models.TenantOwnedModel` (client FK, cascade). Tenant APIs use `core.scoping.ClientScopedViewSet`; never trust a client id from the request; never return unscoped data.
+- Each feature ships with tests, and **tests must pass before every push** (enforced by the `.githooks/pre-push` hook).
+- Small, focused commits. Never commit secrets, `.env`, `node_modules`, build output, or IDE folders.

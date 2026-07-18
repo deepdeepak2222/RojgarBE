@@ -1,3 +1,5 @@
+name: rojgarapp
+
 services:
   db:
     image: postgres:16

@@ -28,10 +28,14 @@ Keep them short, keep them enforced.
 - Booleans read as questions: `is_active`, `has_balance`.
 - No abbreviations except well-known ones (`id`, `url`, `api`).
 
-## 5. No magic values
+## 5. Constants live in a constants file
 
-- No hard-coded strings/numbers scattered in logic. Use constants or settings.
-- Secrets and environment-specific values come from environment variables only.
+- **No magic strings/numbers** scattered in logic.
+- Every package keeps its constants in a dedicated **`constants.py`** (backend)
+  or **`constants.ts`** (frontend) in that same folder — import from there.
+- Genuinely global config goes in Django settings / env, not a constants file.
+- Secrets and environment-specific values come from **environment variables only**
+  and are never committed.
 
 ## 6. Comments
 
@@ -43,11 +47,10 @@ Keep them short, keep them enforced.
 - Never silently swallow errors. Handle, log, or re-raise.
 - Validate input at the boundary (serializers on the backend, forms on the UI).
 
-## 8. Tests & quality
+## 8. Types
 
-- Every feature package ships with at least basic tests.
-- Run linters/formatters before committing (`ruff`/`black` for Python,
-  `eslint`/`prettier` for TypeScript).
+- Backend: use type hints on function signatures (params and return).
+- Frontend: no `any`. Prefer explicit types/interfaces; let `tsc` stay green.
 
 ## 9. Layers (backend)
 
@@ -64,3 +67,33 @@ Business logic that is more than trivial goes into a `services.py`, not the view
 - Tenant-scoped APIs must use `core.scoping.ClientScopedViewSet` (or filter by
   the current client) and require authentication. Never return unscoped data.
 - Deleting a `Client` must cascade to all of its data.
+
+## 11. Tests
+
+- Every feature package ships with at least basic tests.
+- **Tests must pass before every push** — this is enforced by a git pre-push
+  hook (see below), but don't rely on it: run them yourself.
+
+## 12. Commits & quality gates
+
+- Run linters/formatters before committing (`ruff`/`black` for Python,
+  `eslint`/`prettier` for TypeScript).
+- Small, focused commits with a clear message (what + why).
+- Never commit secrets, `.env`, `node_modules`, build output, or IDE folders.
+
+---
+
+## Enforcement (pre-push hook)
+
+Each repo ships a `.githooks/pre-push` that runs the checks before a push:
+
+- **Backend** (`RojgarBE`): runs `python manage.py test` (via Docker).
+- **Frontend** (`RojgarFE`): runs `tsc --noEmit`.
+
+Enable it once per clone (hooks path isn't shared automatically by git):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+A failing check aborts the push. To bypass in an emergency: `git push --no-verify`.
