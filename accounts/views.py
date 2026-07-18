@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.scoping import get_current_client
+from core.scoping import get_membership_client
 
 from .serializers import SignupSerializer
 
@@ -16,7 +16,13 @@ def _tokens_for(user) -> dict:
 
 
 def _client_payload(client) -> dict:
-    return {"id": client.id, "name": client.name}
+    return {
+        "id": client.id,
+        "name": client.name,
+        "is_on_trial": client.is_on_trial,
+        "trial_ends_at": client.trial_ends_at,
+        "has_access": client.has_access(),
+    }
 
 
 class SignupView(APIView):
@@ -32,7 +38,7 @@ class SignupView(APIView):
 
 class MeView(APIView):
     def get(self, request):
-        client = get_current_client(request.user)
+        client = get_membership_client(request.user)
         return Response(
             {
                 "phone": request.user.username,
